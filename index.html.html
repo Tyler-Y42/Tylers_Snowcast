@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyler's Snowcast</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        
+        .master-card {
+            background: linear-gradient(135deg, rgba(116,235,213,0.2) 0%, rgba(172,182,229,0.2) 100%);
+            border: 2px solid rgba(116,235,213,0.4);
+        }
+        .master-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #74ebd5;
+        }
+        .master-card .slider-title { font-size: 0.95rem; }
+        .master-card .days-badge { font-size: 0.95rem; padding: 4px 14px; }
+        .master-card .slider-ticks { font-size: 0.75rem; }
+        .master-card .cutoff-date { font-size: 0.85rem; }
+        .master-card .mode-toggle { justify-content: center; gap: 14px; }
+        .master-card .mode-label { font-size: 0.95rem; }
+        .master-card .toggle-switch { width: 56px; height: 30px; border-radius: 15px; }
+        .master-card .toggle-switch::after { width: 24px; height: 24px; top: 3px; left: 3px; }
+        .master-card .toggle-switch.on::after { transform: translateX(26px); }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .location-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .location-emoji { font-size: 1.2rem; }
+        .temp-section { text-align: right; }
+        .current-temp {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #74ebd5;
+            cursor: help;
+        }
+        .temp-label { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+        
+        .snow-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        .snow-amount.loading { background: none; -webkit-text-fill-color: rgba(255,255,255,0.4); font-size: 1rem; font-weight: 400; }
+        .snow-amount.error { background: none; -webkit-text-fill-color: #ff6b6b; font-size: 0.85rem; font-weight: 400; }
+        .snow-amount.none { background: none; -webkit-text-fill-color: rgba(255,255,255,0.5); font-size: 1rem; font-weight: 400; }
+        
+        .mode-toggle { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .mode-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+        .mode-label.active { color: #74ebd5; font-weight: 600; }
+        .toggle-switch {
+            position: relative; width: 40px; height: 22px;
+            background: rgba(255,255,255,0.2); border-radius: 11px;
+            cursor: pointer; transition: background 0.3s ease;
+        }
+        .toggle-switch.on { background: #4ade80; }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 16px; height: 16px; background: #fff;
+            border-radius: 50%; transition: transform 0.3s ease;
+        }
+        .toggle-switch.on::after { transform: translateX(18px); }
+        
+        .slider-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .slider-title { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+        .days-badge {
+            background: rgba(255,255,255,0.15); padding: 3px 10px;
+            border-radius: 12px; font-weight: 600; font-size: 0.8rem; color: #fff;
+        }
+        input[type="range"] {
+            width: 100%; height: 5px; border-radius: 3px;
+            background: rgba(255,255,255,0.2); outline: none;
+            -webkit-appearance: none; appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            cursor: pointer; box-shadow: 0 2px 8px rgba(116, 235, 213, 0.4);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            cursor: pointer; border: none;
+        }
+        .slider-ticks { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.65rem; color: rgba(255,255,255,0.4); }
+        .cutoff-date { margin-top: 8px; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-align: center; font-style: italic; }
+        
+        footer { text-align: center; margin-top: 40px; color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+        footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+        footer a:hover { color: #74ebd5; }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 1.75rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>❄️ Snow Accumulation Forecast ❄️</h1>
+        </header>
+        <div class="cards-grid" id="cardsContainer"></div>
+        <footer>
+            <p>Snow data from <a href="https://www.weather.gov" target="_blank">api.weather.gov</a> · Temperature from <a href="https://mesowest.utah.edu" target="_blank">MesoWest</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Locations with nearest MesoWest station IDs
+        const locations = [
+            { name: 'Alta', lat: 40.5883, lon: -111.6300, emoji: '🏔️', stid: ['ATB'] },
+            { name: 'Spruces', lat: 40.6555, lon: -111.6302, emoji: '🌲', stid: ['SPC'] },
+            { name: 'Home', lat: 40.7287, lon: -111.8168, emoji: '🏠', stid: ['E6393'] },
+            { name: 'Beaver Creek Trail', lat: 40.626, lon: -111.187, emoji: '⛷️', stid: ['PC354', 'NWRU1'] }, // average
+            { name: 'Little Dell', lat: 40.7735, lon: -111.6937, emoji: '⛷️', stid: ['PC410'] },
+            { name: 'Round Valley', lat: 40.6614, lon: -111.4982, emoji: '⛷️', stid: ['UT224'] },
+            { name: 'FASB', lat: 40.7666, lon: -111.8479, emoji: '🏫', stid: ['WBB'] }
+        ];
+
+        const forecastData = {};
+        const modeState = {};
+        let globalDays = 3;
+        let globalMode = false; // false = Point Estimate
+
+        function createMasterCard() {
+            return `
+                <div class="card master-card">
+                    <h2>⚙️ Master Controls</h2>
+                    <div class="slider-section" style="border-top: none; margin-top: 0; padding-top: 0;">
+                        <div class="slider-header">
+                            <span class="slider-title">Forecast Period (All)</span>
+                            <span class="days-badge" id="masterDaysLabel">+3 days</span>
+                        </div>
+                        <input type="range" id="masterSlider" min="0" max="6" value="3" oninput="applyMasterDays()">
+                        <div class="slider-ticks">
+                            <span>Today</span><span>+1</span><span>+2</span><span>+3</span><span>+4</span><span>+5</span><span>+6</span>
+                        </div>
+                        <div class="cutoff-date" id="masterCutoff"></div>
+                    </div>
+                    <div class="mode-toggle" style="margin-top: 20px;">
+                        <span class="mode-label active" id="masterLabelPoint">Point Estimate</span>
+                        <div class="toggle-switch" id="masterToggle" onclick="applyMasterMode()"></div>
+                        <span class="mode-label" id="masterLabelRange">Range (Scraped)</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createCardHTML(location) {
+            const safeId = location.name.replace(/[^a-zA-Z]/g, '');
+            modeState[safeId] = false;
+            return `
+                <div class="card" id="card-${safeId}">
+                    <div class="card-header">
+                        <span class="location-name">
+                            <span class="location-emoji">${location.emoji}</span>
+                            ${location.name}
+                        </span>
+                        <div class="temp-section">
+                            <div class="current-temp" id="temp-${safeId}" title="Loading...">--°F</div>
+                            <div class="temp-label">Current</div>
+                        </div>
+                    </div>
+                    <div class="snow-amount loading" id="amount-${safeId}">Loading...</div>
+                    <div class="mode-toggle">
+                        <span class="mode-label active" id="label-point-${safeId}">Point Estimate</span>
+                        <div class="toggle-switch" id="toggle-${safeId}" onclick="toggleMode('${safeId}')"></div>
+                        <span class="mode-label" id="label-range-${safeId}">Range (Scraped)</span>
+                    </div>
+                    <div class="slider-section">
+                        <div class="slider-header">
+                            <span class="slider-title">Forecast Period</span>
+                            <span class="days-badge" id="days-${safeId}">+3 days</span>
+                        </div>
+                        <input type="range" id="slider-${safeId}" min="0" max="6" value="3" oninput="updateForecast('${safeId}')">
+                        <div class="slider-ticks">
+                            <span>Today</span><span>+1</span><span>+2</span><span>+3</span><span>+4</span><span>+5</span><span>+6</span>
+                        </div>
+                        <div class="cutoff-date" id="cutoff-${safeId}"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleMode(safeId) {
+            modeState[safeId] = !modeState[safeId];
+            const toggle = document.getElementById(`toggle-${safeId}`);
+            const labelPoint = document.getElementById(`label-point-${safeId}`);
+            const labelRange = document.getElementById(`label-range-${safeId}`);
+            toggle.classList.toggle('on', modeState[safeId]);
+            labelRange.classList.toggle('active', modeState[safeId]);
+            labelPoint.classList.toggle('active', !modeState[safeId]);
+            updateForecast(safeId);
+        }
+
+        function applyMasterMode() {
+            globalMode = !globalMode;
+            const toggle = document.getElementById('masterToggle');
+            const labelPoint = document.getElementById('masterLabelPoint');
+            const labelRange = document.getElementById('masterLabelRange');
+            toggle.classList.toggle('on', globalMode);
+            labelRange.classList.toggle('active', globalMode);
+            labelPoint.classList.toggle('active', !globalMode);
+            
+            // Auto-apply to all locations
+            locations.forEach(loc => {
+                const safeId = loc.name.replace(/[^a-zA-Z]/g, '');
+                modeState[safeId] = globalMode;
+                const locToggle = document.getElementById(`toggle-${safeId}`);
+                const locLabelPoint = document.getElementById(`label-point-${safeId}`);
+                const locLabelRange = document.getElementById(`label-range-${safeId}`);
+                if (locToggle) {
+                    locToggle.classList.toggle('on', globalMode);
+                    locLabelRange.classList.toggle('active', globalMode);
+                    locLabelPoint.classList.toggle('active', !globalMode);
+                    updateForecast(safeId);
+                }
+            });
+        }
+
+        function applyMasterDays() {
+            globalDays = parseInt(document.getElementById('masterSlider').value);
+            const label = document.getElementById('masterDaysLabel');
+            const cutoffEl = document.getElementById('masterCutoff');
+            label.textContent = globalDays === 0 ? 'Today' : `+${globalDays} day${globalDays > 1 ? 's' : ''}`;
+            cutoffEl.textContent = `Until ${formatCutoffDate(getCutoffDate(globalDays))}`;
+            
+            // Auto-apply to all locations
+            locations.forEach(loc => {
+                const safeId = loc.name.replace(/[^a-zA-Z]/g, '');
+                const slider = document.getElementById(`slider-${safeId}`);
+                if (slider) {
+                    slider.value = globalDays;
+                    updateForecast(safeId);
+                }
+            });
+        }
+
+        async function fetchMesoWestTemp(stids) {
+            // Handle array of station IDs (for averaging)
+            const stidList = Array.isArray(stids) ? stids : [stids];
+            const temps = [];
+            const stationNames = [];
+            
+            const token = 'c651d1e209fa4443a42eeef956180701';
+            
+            for (const stid of stidList) {
+                const apiUrl = `https://api.synopticdata.com/v2/stations/latest?stid=${stid}&vars=air_temp&units=english&token=${token}`;
+                
+                try {
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.STATION && data.STATION.length > 0) {
+                            const station = data.STATION[0];
+                            if (station.OBSERVATIONS && station.OBSERVATIONS.air_temp_value_1) {
+                                const tempF = station.OBSERVATIONS.air_temp_value_1.value;
+                                if (tempF !== null && tempF !== undefined) {
+                                    temps.push(tempF);
+                                    stationNames.push(station.STID || stid);
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`MesoWest fetch failed for ${stid}:`, e);
+                }
+            }
+            
+            if (temps.length > 0) {
+                const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+                return {
+                    temp: Math.round(avgTemp),
+                    stationIds: stationNames,
+                    stationName: stationNames.join(' & ')
+                };
+            }
+            return null;
+        }
+
+        async function fetchSnowfallData(location) {
+            const pointsUrl = `https://api.weather.gov/points/${location.lat},${location.lon}`;
+            const pointsResponse = await fetch(pointsUrl, { headers: { 'User-Agent': 'SnowForecast' } });
+            if (!pointsResponse.ok) throw new Error(`Grid error: ${pointsResponse.status}`);
+            
+            const pointsData = await pointsResponse.json();
+            const { gridId, gridX, gridY } = pointsData.properties;
+            const forecastUrl = pointsData.properties.forecast;
+            
+            const gridUrl = `https://api.weather.gov/gridpoints/${gridId}/${gridX},${gridY}`;
+            const gridResponse = await fetch(gridUrl, { headers: { 'User-Agent': 'SnowForecast' } });
+            if (!gridResponse.ok) throw new Error(`Gridpoint error: ${gridResponse.status}`);
+            const gridData = await gridResponse.json();
+            
+            let textPeriods = [];
+            try {
+                const textResponse = await fetch(forecastUrl, { headers: { 'User-Agent': 'SnowForecast' } });
+                if (textResponse.ok) {
+                    const textData = await textResponse.json();
+                    textPeriods = textData.properties.periods || [];
+                }
+            } catch (e) {}
+            
+            // Fetch temp from MesoWest
+            const mesoResult = await fetchMesoWestTemp(location.stid);
+            
+            return {
+                quantitative: gridData.properties.snowfallAmount?.values || [],
+                textPeriods,
+                currentTemp: mesoResult?.temp || null,
+                stationName: mesoResult?.stationName || null,
+                stationIds: mesoResult?.stationIds || []
+            };
+        }
+
+        function getCutoffDate(days) {
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() + days);
+            cutoff.setHours(23, 59, 59, 999);
+            return cutoff;
+        }
+
+        function formatCutoffDate(cutoff) {
+            return cutoff.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + ' 11:59 PM';
+        }
+
+        function parseValidTime(validTime) {
+            const [dateStr, duration] = validTime.split('/');
+            const start = new Date(dateStr);
+            const hours = duration ? parseInt((duration.match(/PT(\d+)H/) || [,1])[1]) : 1;
+            return { start, end: new Date(start.getTime() + hours * 3600000) };
+        }
+
+        function extractTextRanges(textPeriods, cutoff) {
+            let min = 0, max = 0, found = false;
+            textPeriods.forEach(p => {
+                if (new Date(p.startTime) > cutoff) return;
+                const d = p.detailedForecast;
+                (d.match(/(\d+)\s*to\s*(\d+)\s*inch/gi) || []).forEach(m => {
+                    const n = m.match(/(\d+)\s*to\s*(\d+)/);
+                    if (n) { min += +n[1]; max += +n[2]; found = true; }
+                });
+                (d.match(/(?:around|about|near)\s+(\d+)\s*inch/gi) || []).forEach(m => {
+                    const v = +m.match(/(\d+)/)[1];
+                    min += v; max += v; found = true;
+                });
+                (d.match(/less than (?:a |one |(\d+)\s*)inch/gi) || []).forEach(() => { max += 1; found = true; });
+            });
+            return { min, max, found };
+        }
+
+        function calculateSnowfall(data, days, useRange) {
+            const cutoff = getCutoffDate(days);
+            const now = new Date();
+            let totalMm = 0;
+            
+            (data.quantitative || []).forEach(item => {
+                const { start, end } = parseValidTime(item.validTime);
+                if (start <= cutoff && end >= now && item.value !== null) totalMm += item.value;
+            });
+            
+            const inches = Math.round(totalMm / 25.4 * 10) / 10;
+            
+            if (useRange) {
+                const { min, max, found } = extractTextRanges(data.textPeriods, cutoff);
+                if (found && max > 0) return { min, max, isPoint: false };
+            }
+            return { min: inches, max: inches, isPoint: true };
+        }
+
+        function updateForecast(safeId) {
+            const slider = document.getElementById(`slider-${safeId}`);
+            const days = parseInt(slider.value);
+            const daysLabel = document.getElementById(`days-${safeId}`);
+            const cutoffEl = document.getElementById(`cutoff-${safeId}`);
+            const amountEl = document.getElementById(`amount-${safeId}`);
+            
+            daysLabel.textContent = days === 0 ? 'Today' : `+${days} day${days > 1 ? 's' : ''}`;
+            cutoffEl.textContent = `Until ${formatCutoffDate(getCutoffDate(days))}`;
+            
+            if (!forecastData[safeId]) return;
+            
+            const { min, max, isPoint } = calculateSnowfall(forecastData[safeId], days, modeState[safeId]);
+            
+            if (min === 0 && max === 0) {
+                amountEl.className = 'snow-amount none';
+                amountEl.textContent = 'No snow forecast';
+            } else {
+                amountEl.className = 'snow-amount';
+                amountEl.textContent = isPoint || min === max ? `${max}"` : `${min}–${max}"`;
+            }
+        }
+
+        async function initializeCards() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = createMasterCard() + locations.map(createCardHTML).join('');
+            
+            // Init master slider display
+            applyMasterDays();
+            
+            for (const loc of locations) {
+                const safeId = loc.name.replace(/[^a-zA-Z]/g, '');
+                const amountEl = document.getElementById(`amount-${safeId}`);
+                const tempEl = document.getElementById(`temp-${safeId}`);
+                
+                try {
+                    const data = await fetchSnowfallData(loc);
+                    forecastData[safeId] = data;
+                    
+                    if (data.currentTemp !== null) {
+                        tempEl.textContent = `${data.currentTemp}°F`;
+                        tempEl.title = `MesoWest: ${data.stationName}`;
+                        tempEl.style.cursor = 'pointer';
+                        tempEl.onclick = () => {
+                            const firstStation = data.stationIds[0];
+                            window.open(`https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=${firstStation}`, '_blank');
+                        };
+                    } else {
+                        tempEl.textContent = '--°F';
+                        tempEl.title = 'Temperature unavailable';
+                    }
+                    
+                    updateForecast(safeId);
+                } catch (error) {
+                    amountEl.className = 'snow-amount error';
+                    amountEl.textContent = `Error: ${error.message}`;
+                }
+            }
+        }
+
+        window.onload = initializeCards;
+    </script>
+</body>
+</html>
