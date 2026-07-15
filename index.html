@@ -153,13 +153,19 @@
         footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
         footer a:hover { color: #74ebd5; }
         
-        /* Desktop: grid fills the viewport so the two card rows always span the screen */
-        @media (min-width: 900px) {
+        /* Desktop: one column per group and the grid fills the viewport,
+           so there are always exactly two card rows spanning the screen */
+        @media (min-width: 1024px) {
             html, body { height: 100%; }
             body { padding-bottom: 110px; }
             .container { min-height: 100%; display: flex; flex-direction: column; }
-            .cards-grid { flex: 1; min-height: 0; align-items: stretch; }
+            .cards-grid {
+                flex: 1; min-height: 0; align-items: stretch;
+                grid-template-columns: repeat(5, 1fr); /* one per group */
+                gap: clamp(12px, 1.4vw, 20px);
+            }
             .group > .card { flex: 1; }
+            .card { padding: 28px clamp(14px, 2.2vw, 32px); }
             footer { margin-top: 16px; }
         }
 
