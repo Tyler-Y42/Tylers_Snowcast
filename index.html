@@ -11,53 +11,64 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 30px 20px 130px; /* bottom clearance for fixed master bar */
             color: #fff;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        
+        .container { max-width: 1500px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 24px; }
+        h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
+            align-items: start;
         }
-        
+        .group { display: flex; flex-direction: column; gap: 14px; }
+
         .card {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 24px;
+            padding: 28px 32px;
             border: 1px solid rgba(255,255,255,0.15);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        
-        .master-card {
-            background: linear-gradient(135deg, rgba(116,235,213,0.2) 0%, rgba(172,182,229,0.2) 100%);
-            border: 2px solid rgba(116,235,213,0.4);
+
+        .master-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            flex-wrap: wrap; gap: 10px 28px;
+            padding: 12px 20px;
+            background: rgba(20, 25, 55, 0.88);
+            backdrop-filter: blur(14px);
+            border-top: 1px solid rgba(116,235,213,0.35);
         }
-        .master-card h2 {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            color: #74ebd5;
+        .master-bar .master-title { font-weight: 700; color: #74ebd5; letter-spacing: 1px; font-size: 0.95rem; white-space: nowrap; }
+        .master-info { display: flex; align-items: center; gap: 12px; }
+        .master-slider-wrap { display: flex; flex-direction: column; gap: 5px; flex: 1 1 280px; max-width: 520px; }
+        .master-bar input[type="range"] { width: 100%; height: 12px; border-radius: 6px; }
+        .master-bar input[type="range"]::-webkit-slider-thumb { width: 30px; height: 30px; }
+        .master-bar input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; }
+        .master-bar .slider-ticks { margin-top: 2px; font-size: 0.7rem; color: rgba(255,255,255,0.55); }
+        .master-bar .days-badge { white-space: nowrap; background: rgba(116,235,213,0.25); }
+        .master-bar .cutoff-date {
+            margin-top: 0; white-space: nowrap;
+            font-style: normal; font-weight: 700; font-size: 1rem;
+            color: #74ebd5; text-shadow: 0 0 12px rgba(116,235,213,0.35);
         }
-        .master-card .slider-title { font-size: 0.95rem; }
-        .master-card .days-badge { font-size: 0.95rem; padding: 4px 14px; }
-        .master-card .slider-ticks { font-size: 0.75rem; }
-        .master-card .cutoff-date { font-size: 0.85rem; }
-        .master-card .mode-toggle { justify-content: center; gap: 14px; }
-        .master-card .mode-label { font-size: 0.95rem; }
-        .master-card .toggle-switch { width: 56px; height: 30px; border-radius: 15px; }
-        .master-card .toggle-switch::after { width: 24px; height: 24px; top: 3px; left: 3px; }
-        .master-card .toggle-switch.on::after { transform: translateX(26px); }
+        .master-bar .mode-toggle { margin-top: 0; }
+        .mode-hint { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 6px; }
         
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 28px;
         }
         .location-name {
             font-size: 1.1rem;
@@ -75,7 +86,17 @@
             color: #74ebd5;
             cursor: help;
         }
-        .temp-label { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+        .wind-speed { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+
+        .group-header {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.75);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 6px;
+        }
         
         .snow-amount {
             font-size: 2rem;
@@ -90,7 +111,7 @@
         .snow-amount.error { background: none; -webkit-text-fill-color: #ff6b6b; font-size: 0.85rem; font-weight: 400; }
         .snow-amount.none { background: none; -webkit-text-fill-color: rgba(255,255,255,0.5); font-size: 1rem; font-weight: 400; }
         
-        .mode-toggle { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .mode-toggle { display: flex; align-items: center; gap: 10px; margin-top: 26px; }
         .mode-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
         .mode-label.active { color: #74ebd5; font-weight: 600; }
         .toggle-switch {
@@ -106,9 +127,6 @@
         }
         .toggle-switch.on::after { transform: translateX(18px); }
         
-        .slider-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .slider-title { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
         .days-badge {
             background: rgba(255,255,255,0.15); padding: 3px 10px;
             border-radius: 12px; font-weight: 600; font-size: 0.8rem; color: #fff;
@@ -135,10 +153,21 @@
         footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
         footer a:hover { color: #74ebd5; }
         
+        /* Desktop: grid fills the viewport so the two card rows always span the screen */
+        @media (min-width: 900px) {
+            html, body { height: 100%; }
+            body { padding-bottom: 110px; }
+            .container { min-height: 100%; display: flex; flex-direction: column; }
+            .cards-grid { flex: 1; min-height: 0; align-items: stretch; }
+            .group > .card { flex: 1; }
+            footer { margin-top: 16px; }
+        }
+
         @media (max-width: 600px) {
+            body { padding: 24px 14px 190px; } /* taller clearance: master bar wraps on phones */
             h1 { font-size: 1.75rem; }
             .cards-grid { grid-template-columns: 1fr; }
-            .card { padding: 18px; }
+            .master-bar { gap: 8px 18px; }
         }
     </style>
 </head>
@@ -150,19 +179,29 @@
         <div class="cards-grid" id="cardsContainer"></div>
         <footer>
             <p>Snow data from <a href="https://www.weather.gov" target="_blank">api.weather.gov</a> · Temperature from <a href="https://mesowest.utah.edu" target="_blank">MesoWest</a></p>
+            <p class="mode-hint">Point = NWS Gridpoint Model Total&nbsp; | &nbsp;Range = min-max scraped from text forecast</p>
         </footer>
     </div>
 
     <script>
-        // Locations with nearest MesoWest station IDs
+        // Locations with nearest MesoWest station IDs, grouped by area, higher elevation first
+        const groupOrder = ['LCC', 'BCC', 'SLC', 'Uintas', 'Misc'];
         const locations = [
-            { name: 'Alta', lat: 40.5883, lon: -111.6300, emoji: '🏔️', stid: ['ATB'] },
-            { name: 'Spruces', lat: 40.6555, lon: -111.6302, emoji: '🌲', stid: ['SPC'] },
-            { name: 'Home', lat: 40.7287, lon: -111.8168, emoji: '🏠', stid: ['E6393'] },
-            { name: 'Beaver Creek Trail', lat: 40.626, lon: -111.187, emoji: '⛷️', stid: ['PC354', 'NWRU1'] }, // average
-            { name: 'Little Dell', lat: 40.7735, lon: -111.6937, emoji: '⛷️', stid: ['PC410'] },
-            { name: 'Round Valley', lat: 40.6614, lon: -111.4982, emoji: '⛷️', stid: ['UT224'] },
-            { name: 'FASB', lat: 40.7666, lon: -111.8479, emoji: '🏫', stid: ['WBB'] }
+            // Little Cottonwood Canyon
+            { name: 'Alta Peak', group: 'LCC', lat: 40.5677, lon: -111.6374, emoji: '🗻', stid: ['AMB'] }, // Mt Baldy
+            { name: 'Alta Base', group: 'LCC', lat: 40.5884, lon: -111.6386, emoji: '🏔️', stid: ['ATB'] },
+            // Big Cottonwood Canyon
+            { name: 'Brighton Peak', group: 'BCC', lat: 40.5923, lon: -111.5616, emoji: '🗻', stid: ['BRW'] }, // Great Western
+            { name: 'Spruces', group: 'BCC', lat: 40.6555, lon: -111.6302, emoji: '🌲', stid: ['SPC'] },
+            // Salt Lake City
+            { name: 'SLC East Bench', group: 'SLC', lat: 40.7287, lon: -111.8168, emoji: '🏠', stid: ['E6393'] },
+            { name: 'U of U', group: 'SLC', lat: 40.7666, lon: -111.8479, emoji: '🏫', stid: ['WBB'] },
+            // Uintas
+            { name: 'High Uintas', group: 'Uintas', lat: 40.7179, lon: -110.4672, emoji: '⛰️', stid: ['FPLU1'] }, // Five Points Lake SNOTEL (no wind sensor)
+            { name: 'Low Uintas', group: 'Uintas', lat: 40.626, lon: -111.187, emoji: '🦫', stid: ['PC354', 'NWRU1'] }, // average
+            // Misc
+            { name: 'Donner Pass', group: 'Misc', lat: 39.4290, lon: -120.2680, emoji: '🦃', stid: ['SGHEN'] }, // Sagehen Creek mid-elevation
+            { name: 'Little Dell', group: 'Misc', lat: 40.7735, lon: -111.6937, emoji: '💧', stid: ['PC410'] }
         ];
 
         const forecastData = {};
@@ -170,25 +209,24 @@
         let globalDays = 3;
         let globalMode = false; // false = Point Estimate
 
-        function createMasterCard() {
+        function createMasterBar() {
             return `
-                <div class="card master-card">
-                    <h2>⚙️ Master Controls</h2>
-                    <div class="slider-section" style="border-top: none; margin-top: 0; padding-top: 0;">
-                        <div class="slider-header">
-                            <span class="slider-title">Forecast Period (All)</span>
-                            <span class="days-badge" id="masterDaysLabel">+3 days</span>
-                        </div>
+                <div class="master-bar">
+                    <div class="master-info">
+                        <span class="master-title">⏱️ Forecast Period</span>
+                        <span class="days-badge" id="masterDaysLabel">+3 days</span>
+                        <span class="cutoff-date" id="masterCutoff"></span>
+                    </div>
+                    <div class="master-slider-wrap">
                         <input type="range" id="masterSlider" min="0" max="6" value="3" oninput="applyMasterDays()">
                         <div class="slider-ticks">
                             <span>Today</span><span>+1</span><span>+2</span><span>+3</span><span>+4</span><span>+5</span><span>+6</span>
                         </div>
-                        <div class="cutoff-date" id="masterCutoff"></div>
                     </div>
-                    <div class="mode-toggle" style="margin-top: 20px;">
+                    <div class="mode-toggle">
                         <span class="mode-label active" id="masterLabelPoint">Point Estimate</span>
                         <div class="toggle-switch" id="masterToggle" onclick="applyMasterMode()"></div>
-                        <span class="mode-label" id="masterLabelRange">Range (Scraped)</span>
+                        <span class="mode-label" id="masterLabelRange">Range</span>
                     </div>
                 </div>
             `;
@@ -206,25 +244,14 @@
                         </span>
                         <div class="temp-section">
                             <div class="current-temp" id="temp-${safeId}" title="Loading...">--°F</div>
-                            <div class="temp-label">Current</div>
+                            <div class="wind-speed" id="wind-${safeId}">-- mph</div>
                         </div>
                     </div>
                     <div class="snow-amount loading" id="amount-${safeId}">Loading...</div>
                     <div class="mode-toggle">
                         <span class="mode-label active" id="label-point-${safeId}">Point Estimate</span>
                         <div class="toggle-switch" id="toggle-${safeId}" onclick="toggleMode('${safeId}')"></div>
-                        <span class="mode-label" id="label-range-${safeId}">Range (Scraped)</span>
-                    </div>
-                    <div class="slider-section">
-                        <div class="slider-header">
-                            <span class="slider-title">Forecast Period</span>
-                            <span class="days-badge" id="days-${safeId}">+3 days</span>
-                        </div>
-                        <input type="range" id="slider-${safeId}" min="0" max="6" value="3" oninput="updateForecast('${safeId}')">
-                        <div class="slider-ticks">
-                            <span>Today</span><span>+1</span><span>+2</span><span>+3</span><span>+4</span><span>+5</span><span>+6</span>
-                        </div>
-                        <div class="cutoff-date" id="cutoff-${safeId}"></div>
+                        <span class="mode-label" id="label-range-${safeId}">Range</span>
                     </div>
                 </div>
             `;
@@ -276,11 +303,7 @@
             // Auto-apply to all locations
             locations.forEach(loc => {
                 const safeId = loc.name.replace(/[^a-zA-Z]/g, '');
-                const slider = document.getElementById(`slider-${safeId}`);
-                if (slider) {
-                    slider.value = globalDays;
-                    updateForecast(safeId);
-                }
+                if (document.getElementById(`card-${safeId}`)) updateForecast(safeId);
             });
         }
 
@@ -288,37 +311,48 @@
             // Handle array of station IDs (for averaging)
             const stidList = Array.isArray(stids) ? stids : [stids];
             const temps = [];
+            const winds = [];
             const stationNames = [];
-            
+
             const token = 'c651d1e209fa4443a42eeef956180701';
-            
+
             for (const stid of stidList) {
-                const apiUrl = `https://api.synopticdata.com/v2/stations/latest?stid=${stid}&vars=air_temp&units=english&token=${token}`;
-                
-                try {
-                    const response = await fetch(apiUrl);
-                    if (response.ok) {
+                // Timeseries over the last 6h so slow reporters (hourly SNOTELs) still yield 3 wind obs
+                const apiUrl = `https://api.synopticdata.com/v2/stations/timeseries?stid=${stid}&recent=360&vars=air_temp,wind_speed&units=english&token=${token}`;
+
+                // Synoptic occasionally returns truncated JSON — retry a couple times
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
                         const data = await response.json();
                         if (data.STATION && data.STATION.length > 0) {
                             const station = data.STATION[0];
-                            if (station.OBSERVATIONS && station.OBSERVATIONS.air_temp_value_1) {
-                                const tempF = station.OBSERVATIONS.air_temp_value_1.value;
-                                if (tempF !== null && tempF !== undefined) {
-                                    temps.push(tempF);
-                                    stationNames.push(station.STID || stid);
-                                }
+                            const obs = station.OBSERVATIONS || {};
+                            const tempSeries = (obs.air_temp_set_1 || []).filter(v => v !== null && v !== undefined);
+                            if (tempSeries.length > 0) {
+                                temps.push(tempSeries[tempSeries.length - 1]); // most recent temp
+                                stationNames.push(station.STID || stid);
+                            }
+                            const windSeries = (obs.wind_speed_set_1 || []).filter(v => v !== null && v !== undefined);
+                            if (windSeries.length > 0) {
+                                const last3 = windSeries.slice(-3); // average of 3 most recent obs
+                                winds.push(last3.reduce((a, b) => a + b, 0) / last3.length);
                             }
                         }
+                        break;
+                    } catch (e) {
+                        if (attempt === 3) console.warn(`MesoWest fetch failed for ${stid}:`, e);
+                        else await new Promise(r => setTimeout(r, 500 * attempt));
                     }
-                } catch (e) {
-                    console.warn(`MesoWest fetch failed for ${stid}:`, e);
                 }
             }
-            
+
             if (temps.length > 0) {
                 const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
                 return {
                     temp: Math.round(avgTemp),
+                    wind: winds.length > 0 ? Math.round(winds.reduce((a, b) => a + b, 0) / winds.length) : null,
                     stationIds: stationNames,
                     stationName: stationNames.join(' & ')
                 };
@@ -354,8 +388,10 @@
             
             return {
                 quantitative: gridData.properties.snowfallAmount?.values || [],
+                uom: gridData.properties.snowfallAmount?.uom || 'wmoUnit:mm',
                 textPeriods,
-                currentTemp: mesoResult?.temp || null,
+                currentTemp: mesoResult?.temp ?? null,
+                currentWind: mesoResult?.wind ?? null,
                 stationName: mesoResult?.stationName || null,
                 stationIds: mesoResult?.stationIds || []
             };
@@ -372,11 +408,26 @@
             return cutoff.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + ' 11:59 PM';
         }
 
+        function parseISODuration(duration) {
+            // Handles NWS durations like PT6H, P1D, P1DT6H, PT30M
+            const [datePart, timePart] = duration.split('T');
+            let ms = 0;
+            const days = datePart.match(/(\d+)D/);
+            if (days) ms += +days[1] * 86400000;
+            if (timePart) {
+                const h = timePart.match(/(\d+)H/);
+                const m = timePart.match(/(\d+)M/);
+                if (h) ms += +h[1] * 3600000;
+                if (m) ms += +m[1] * 60000;
+            }
+            return ms || 3600000;
+        }
+
         function parseValidTime(validTime) {
             const [dateStr, duration] = validTime.split('/');
             const start = new Date(dateStr);
-            const hours = duration ? parseInt((duration.match(/PT(\d+)H/) || [,1])[1]) : 1;
-            return { start, end: new Date(start.getTime() + hours * 3600000) };
+            const ms = duration ? parseISODuration(duration) : 3600000;
+            return { start, end: new Date(start.getTime() + ms) };
         }
 
         function extractTextRanges(textPeriods, cutoff) {
@@ -393,21 +444,36 @@
                     min += v; max += v; found = true;
                 });
                 (d.match(/less than (?:a |one |(\d+)\s*)inch/gi) || []).forEach(() => { max += 1; found = true; });
+                (d.match(/up to (\d+)\s*inch/gi) || []).forEach(m => {
+                    max += +m.match(/(\d+)/)[1]; found = true;
+                });
+                (d.match(/(?:a |one )half (?:an )?inch|half an inch/gi) || []).forEach(() => { max += 0.5; found = true; });
             });
             return { min, max, found };
+        }
+
+        function toInches(value, uom) {
+            if (/:in/.test(uom)) return value;
+            if (/:cm/.test(uom)) return value / 2.54;
+            return value / 25.4; // wmoUnit:mm (NWS default)
         }
 
         function calculateSnowfall(data, days, useRange) {
             const cutoff = getCutoffDate(days);
             const now = new Date();
-            let totalMm = 0;
-            
+            let total = 0;
+
             (data.quantitative || []).forEach(item => {
+                if (item.value === null) return;
                 const { start, end } = parseValidTime(item.validTime);
-                if (start <= cutoff && end >= now && item.value !== null) totalMm += item.value;
+                // Pro-rate blocks partially outside [now, cutoff] to the overlapping fraction
+                const overlapStart = Math.max(start.getTime(), now.getTime());
+                const overlapEnd = Math.min(end.getTime(), cutoff.getTime());
+                if (overlapEnd <= overlapStart) return;
+                total += item.value * (overlapEnd - overlapStart) / (end.getTime() - start.getTime());
             });
-            
-            const inches = Math.round(totalMm / 25.4 * 10) / 10;
+
+            const inches = Math.round(toInches(total, data.uom) * 10) / 10;
             
             if (useRange) {
                 const { min, max, found } = extractTextRanges(data.textPeriods, cutoff);
@@ -417,18 +483,11 @@
         }
 
         function updateForecast(safeId) {
-            const slider = document.getElementById(`slider-${safeId}`);
-            const days = parseInt(slider.value);
-            const daysLabel = document.getElementById(`days-${safeId}`);
-            const cutoffEl = document.getElementById(`cutoff-${safeId}`);
             const amountEl = document.getElementById(`amount-${safeId}`);
-            
-            daysLabel.textContent = days === 0 ? 'Today' : `+${days} day${days > 1 ? 's' : ''}`;
-            cutoffEl.textContent = `Until ${formatCutoffDate(getCutoffDate(days))}`;
-            
+
             if (!forecastData[safeId]) return;
-            
-            const { min, max, isPoint } = calculateSnowfall(forecastData[safeId], days, modeState[safeId]);
+
+            const { min, max, isPoint } = calculateSnowfall(forecastData[safeId], globalDays, modeState[safeId]);
             
             if (min === 0 && max === 0) {
                 amountEl.className = 'snow-amount none';
@@ -441,38 +500,57 @@
 
         async function initializeCards() {
             const container = document.getElementById('cardsContainer');
-            container.innerHTML = createMasterCard() + locations.map(createCardHTML).join('');
-            
+            let html = '';
+            groupOrder.forEach(group => {
+                const groupLocs = locations.filter(loc => loc.group === group);
+                if (groupLocs.length === 0) return;
+                html += `<section class="group"><div class="group-header">${group}</div>${groupLocs.map(createCardHTML).join('')}</section>`;
+            });
+            container.innerHTML = html;
+            document.body.insertAdjacentHTML('beforeend', createMasterBar());
+
             // Init master slider display
             applyMasterDays();
-            
-            for (const loc of locations) {
-                const safeId = loc.name.replace(/[^a-zA-Z]/g, '');
-                const amountEl = document.getElementById(`amount-${safeId}`);
-                const tempEl = document.getElementById(`temp-${safeId}`);
-                
-                try {
-                    const data = await fetchSnowfallData(loc);
-                    forecastData[safeId] = data;
-                    
-                    if (data.currentTemp !== null) {
-                        tempEl.textContent = `${data.currentTemp}°F`;
-                        tempEl.title = `MesoWest: ${data.stationName}`;
-                        tempEl.style.cursor = 'pointer';
-                        tempEl.onclick = () => {
-                            const firstStation = data.stationIds[0];
-                            window.open(`https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=${firstStation}`, '_blank');
-                        };
-                    } else {
-                        tempEl.textContent = '--°F';
-                        tempEl.title = 'Temperature unavailable';
-                    }
-                    
-                    updateForecast(safeId);
-                } catch (error) {
-                    amountEl.className = 'snow-amount error';
-                    amountEl.textContent = `Error: ${error.message}`;
+
+            loadAllData();
+            setInterval(loadAllData, 10 * 60 * 1000); // refresh every 10 minutes
+        }
+
+        async function loadAllData() {
+            await Promise.all(locations.map(loadLocation));
+        }
+
+        async function loadLocation(loc) {
+            const safeId = loc.name.replace(/[^a-zA-Z]/g, '');
+            const amountEl = document.getElementById(`amount-${safeId}`);
+            const tempEl = document.getElementById(`temp-${safeId}`);
+            const windEl = document.getElementById(`wind-${safeId}`);
+
+            try {
+                const data = await fetchSnowfallData(loc);
+                forecastData[safeId] = data;
+
+                if (data.currentTemp !== null) {
+                    tempEl.textContent = `${data.currentTemp}°F`;
+                    tempEl.title = `MesoWest: ${data.stationName}`;
+                    tempEl.style.cursor = 'pointer';
+                    tempEl.onclick = () => {
+                        const firstStation = data.stationIds[0];
+                        window.open(`https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=${firstStation}`, '_blank');
+                    };
+                } else {
+                    tempEl.textContent = '--°F';
+                    tempEl.title = 'Temperature unavailable';
                 }
+
+                if (data.currentWind !== null) {
+                    windEl.textContent = `${data.currentWind} mph`;
+                }
+
+                updateForecast(safeId);
+            } catch (error) {
+                amountEl.className = 'snow-amount error';
+                amountEl.textContent = `Error: ${error.message}`;
             }
         }
 
